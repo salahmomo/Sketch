@@ -105,6 +105,9 @@ public class ImagesCellAdapter extends RecyclerView.Adapter<ImagesCellAdapter.Vi
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        //Test other lib
+
+
 /*        Sketch.getInstance().initCacheWithDefaultSize(context).loadImage(urls.get(position), new BitmapLoaderListener() {
             @Override
             public void onFinish(Bitmap bitmap) {

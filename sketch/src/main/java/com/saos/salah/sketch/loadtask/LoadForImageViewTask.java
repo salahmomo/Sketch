@@ -3,6 +3,8 @@ package com.saos.salah.sketch.loadtask;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
+import com.saos.salah.sketch.Sketch;
+
 /**
  * Created by Salah on 27/10/2017.
  */

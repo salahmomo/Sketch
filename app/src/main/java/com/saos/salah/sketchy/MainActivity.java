@@ -16,8 +16,6 @@ public class MainActivity extends AppCompatActivity {
     ImagesCellAdapter imagesCellAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    CellArrayAdapter cellArrayAdapter;
-
     public static ImageLoader imageLoader;
     public static DisplayImageOptions displayImageOptions;
 
@@ -28,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
 
         listView = (RecyclerView) findViewById(R.id.list_item);
         listView.setHasFixedSize(true);
-        cellArrayAdapter = new CellArrayAdapter(this, R.layout.cell);
 
         imagesCellAdapter = new ImagesCellAdapter(this);
         mLayoutManager = new LinearLayoutManager(this);

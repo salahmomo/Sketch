@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.saos.salah.sketch.cache.DiskCache;
 import com.saos.salah.sketch.cache.MemoryCache;
 import com.saos.salah.sketch.client.NetworkClient;
 import com.saos.salah.sketch.listener.BitmapLoaderListener;
@@ -19,6 +20,7 @@ public class Sketch {
 
     private static MemoryCache cacheManager;
     private static NetworkClient clientManager;
+    private static DiskCache diskCache;
 
     private static LoadTaskManager loadTaskManager;
 
@@ -39,6 +41,7 @@ public class Sketch {
         if (cacheManager == null)
             cacheManager = new MemoryCache(context, sizeCache);
 
+        initDiskCache(context);
         return getInstance();
     }
 
@@ -46,6 +49,7 @@ public class Sketch {
         if (cacheManager == null)
             cacheManager = new MemoryCache(context);
 
+        initDiskCache(context);
         return getInstance();
     }
 
@@ -59,6 +63,20 @@ public class Sketch {
         Log.i("Sketch", "putToCache");
         cacheManager.putBitmapOnCache(url, bitmap);
     }
+
+    private void initDiskCache(Context context) {
+        if (diskCache == null)
+            diskCache = new DiskCache(context);
+    }
+
+    public void putToDiskCache(String url, Bitmap bitmap) {
+        diskCache.putBitmap(url, bitmap);
+    }
+
+    public Bitmap getToDiskCache(String url) {
+        return diskCache.getBitmap(url);
+    }
+
 
     public Bitmap loadBitmapFromClient(String url) {
         Log.i("Sketch", "loadBitmapFromClient");

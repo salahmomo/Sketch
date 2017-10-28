@@ -29,6 +29,10 @@ public abstract class LoadTask extends AsyncTask<String, Void, Bitmap> {
             Log.i("LoadTask", "Get From Cache YES");
             return imageResult;
         }
+        else if ((imageResult = getImageFromDiskCache(url)) != null) {
+            Log.i("LoadTask", "Get From Disk Cache YES");
+            return imageResult;
+        }
         else {
             Log.i("LoadTask", "doInBackground Start Using client");
             imageResult =  Sketch.getInstance().loadBitmapFromClientWithSize(url, 100, 100);
@@ -36,6 +40,7 @@ public abstract class LoadTask extends AsyncTask<String, Void, Bitmap> {
             if (imageResult != null) {
                 Log.i("LoadTask", "doInBackground Image Find");
                 Sketch.getInstance().putToCache(url, imageResult);
+                Sketch.getInstance().putToDiskCache(url, imageResult);
                 return imageResult;
             }
         }
@@ -50,6 +55,11 @@ public abstract class LoadTask extends AsyncTask<String, Void, Bitmap> {
 
     protected Bitmap getImageFromCache(String url) {
         Bitmap bitmap = Sketch.getInstance().getFromCache(url);
+        return bitmap;
+    }
+
+    protected Bitmap getImageFromDiskCache(String url) {
+        Bitmap bitmap = Sketch.getInstance().getToDiskCache(url);
         return bitmap;
     }
 
