@@ -1,46 +1,67 @@
+/**
+ * Created by Salah
+ */
 package com.saos.salah.sketch.loadtask;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.saos.salah.sketch.Sketch;
+import com.saos.salah.sketch.cache.CacheManager;
+import com.saos.salah.sketch.client.NetworkClient;
+import com.saos.salah.sketch.listener.LoadTaskListener;
 
 /**
- * Created by Salah on 27/10/2017.
+ * Actions to load a ImageView
  */
-
 public abstract class LoadTask extends AsyncTask<String, Void, Bitmap> {
 
-    protected LoadTaskManager.LoadTaskListener loadTaskListener;
+    protected CacheManager cacheManager;
+    protected NetworkClient networkClient;
+    protected LoadTaskListener loadTaskListener;
 
-
-    public LoadTask(LoadTaskManager.LoadTaskListener loadTaskListener) {
+    public LoadTask(LoadTaskListener loadTaskListener, CacheManager cacheManager, NetworkClient networkClient) {
         this.loadTaskListener = loadTaskListener;
+        this.cacheManager = cacheManager;
+        this.networkClient = networkClient;
     }
 
+    /**
+     * Get a bitmap image from cache or network
+     *      get image from MemoryCache, if yes return it otherwise
+     *      get from DiskCache, if yes save in MemoryCache and return it otherwise
+     *      get from network, save in MemoryCache and DiskCache and return it
+     * @param urls
+     * @return
+     */
     @Override
     protected Bitmap doInBackground(String... urls) {
+        Log.i("LoadTask", "start doInBackground");
         String url = urls[0];
         Bitmap imageResult = null;
 
-        Log.i("LoadTask", "start doInBackground");
-        if ((imageResult = getImageFromCache(url)) != null) {
-            Log.i("LoadTask", "Get From Cache YES");
+        if ((imageResult = this.cacheManager.getFromMemoryCache(url)) != null) {
+            Log.i("LoadTask", "Get From Cache");
             return imageResult;
         }
-        else if ((imageResult = getImageFromDiskCache(url)) != null) {
-            Log.i("LoadTask", "Get From Disk Cache YES");
+        else if (this.cacheManager.isDiskContainUrl(url)) {
+            imageResult =  this.cacheManager.getFromDiskCache(url);
+
+            cacheManager.putToMemoryCache(url, imageResult);
+
+            Log.i("LoadTask", "doInBackground - Get From Disk Cache");
+
             return imageResult;
         }
         else {
-            Log.i("LoadTask", "doInBackground Start Using client");
-            imageResult =  Sketch.getInstance().loadBitmapFromClientWithSize(url, 100, 100);
+            Log.i("LoadTask", "doInBackground - Start Using Network client");
+            imageResult =   this.networkClient.loadBitmap(url);
 
             if (imageResult != null) {
-                Log.i("LoadTask", "doInBackground Image Find");
-                Sketch.getInstance().putToCache(url, imageResult);
-                Sketch.getInstance().putToDiskCache(url, imageResult);
+                Log.i("LoadTask", "doInBackground - Get From Network");
+
+                cacheManager.putToMemoryCache(url, imageResult);
+                cacheManager.putToDiskCache(url, imageResult);
                 return imageResult;
             }
         }
@@ -52,15 +73,4 @@ public abstract class LoadTask extends AsyncTask<String, Void, Bitmap> {
         super.onCancelled();
         loadTaskListener.onFinishTask();
     }
-
-    protected Bitmap getImageFromCache(String url) {
-        Bitmap bitmap = Sketch.getInstance().getFromCache(url);
-        return bitmap;
-    }
-
-    protected Bitmap getImageFromDiskCache(String url) {
-        Bitmap bitmap = Sketch.getInstance().getToDiskCache(url);
-        return bitmap;
-    }
-
 }

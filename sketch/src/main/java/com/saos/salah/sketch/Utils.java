@@ -8,6 +8,13 @@ import android.graphics.BitmapFactory;
 
 public class Utils {
 
+    /**
+     * Create SampleSize with BitmapFactory option, reqWidth & req Height
+     * @param options
+     * @param reqWidth
+     * @param reqHeight
+     * @return
+     */
     public static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
 

@@ -1,116 +1,100 @@
+/**
+ * Created by Salah
+ */
 package com.saos.salah.sketch;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.widget.ImageView;
 
-import com.saos.salah.sketch.cache.DiskCache;
-import com.saos.salah.sketch.cache.MemoryCache;
+import com.saos.salah.sketch.cache.CacheManager;
 import com.saos.salah.sketch.client.NetworkClient;
 import com.saos.salah.sketch.listener.BitmapLoaderListener;
 import com.saos.salah.sketch.loadtask.LoadTaskManager;
 
-/**
- * Created by Salah on 27/10/2017.
- */
 
+/**
+ * Skecth Lib entry point
+ */
 public class Sketch {
     private static Sketch instance = null;
 
-    private static MemoryCache cacheManager;
-    private static NetworkClient clientManager;
-    private static DiskCache diskCache;
+    private NetworkClient clientManager;
+    private CacheManager cacheManager;
+    private LoadTaskManager loadTaskManager;
 
-    private static LoadTaskManager loadTaskManager;
-
-    private Sketch () {
+    private Sketch (Context context) {
+        this.loadTaskManager = new LoadTaskManager();
+        this.clientManager = new NetworkClient();
+        this.cacheManager = new CacheManager(context);
     }
 
-    public static Sketch getInstance() {
+    /**
+     * Initialize Sketch with Context context memorySize memory cache and diskSize disk cache
+     * @param context
+     * @param memorySize
+     * @param diskSize
+     */
+    private Sketch (Context context, int memorySize, int diskSize) {
+        this.loadTaskManager = new LoadTaskManager();
+        this.clientManager = new NetworkClient();
+        this.cacheManager = new CacheManager(context, memorySize, diskSize);
+    }
+
+    public static Sketch getInstance(Context context) {
         if  (instance == null) {
-            instance = new Sketch();
-            loadTaskManager = new LoadTaskManager();
-            clientManager = new NetworkClient();
+            instance = new Sketch(context);
         }
 
         return instance;
     }
 
-    public Sketch initCacheWithSize(Context context, int sizeCache) {
-        if (cacheManager == null)
-            cacheManager = new MemoryCache(context, sizeCache);
+    public static Sketch getInstance(Context context, int memorySize, int diskSize) {
+        if  (instance == null) {
+            instance = new Sketch(context, memorySize, diskSize);
+        }
 
-        initDiskCache(context);
-        return getInstance();
+        return instance;
     }
 
-    public Sketch initCacheWithDefaultSize(Context context) {
-        if (cacheManager == null)
-            cacheManager = new MemoryCache(context);
+    public Sketch enableDiskCache() {
+        cacheManager.setIsDiskCacheEnable(true);
 
-        initDiskCache(context);
-        return getInstance();
+        return instance;
     }
 
-    public Bitmap getFromCache(String url) {
-        Log.i("Sketch", "getFromCache");
-        Bitmap bitmap = cacheManager.getBitmapFromCache(url);
-        return bitmap;
+    public Sketch disableDiskCache() {
+        cacheManager.setIsDiskCacheEnable(false);
+
+        return instance;
     }
 
-    public void putToCache(String url, Bitmap bitmap) {
-        Log.i("Sketch", "putToCache");
-        cacheManager.putBitmapOnCache(url, bitmap);
-    }
-
-    private void initDiskCache(Context context) {
-        if (diskCache == null)
-            diskCache = new DiskCache(context);
-    }
-
-    public void putToDiskCache(String url, Bitmap bitmap) {
-        diskCache.putBitmap(url, bitmap);
-    }
-
-    public Bitmap getToDiskCache(String url) {
-        return diskCache.getBitmap(url);
-    }
-
-
-    public Bitmap loadBitmapFromClient(String url) {
-        Log.i("Sketch", "loadBitmapFromClient");
-        return clientManager.loadBitmap(url);
-    }
-
-    public Bitmap loadBitmapFromClientWithSize(String url, int width, int height) {
-        Log.i("Sketch", "loadBitmapFromClient");
-        return clientManager.loadBitmapForMeasure(url, width, height);
-    }
-
+    /**
+     * Load Image from String url with listener BitmapLoaderListener
+     * @param url
+     * @param bitmapLoaderListener
+     */
     public void loadImage(final String url, final BitmapLoaderListener bitmapLoaderListener) {
-        (new Thread(new Runnable() {
-            @Override
-            public void run() {
-              loadTaskManager.loadImageIntoBitmap(url, bitmapLoaderListener);
-            }
-        })).run();
+        this.loadTaskManager.loadImageIntoBitmap(url, bitmapLoaderListener, cacheManager, clientManager);
     }
 
-    public Sketch loadImageIntoImageView(final String url, final ImageView imageView){
-        (new Thread(new Runnable() {
-            @Override
-            public void run() {
-                loadTaskManager.loadImageIntoImageView(url, imageView);
-            }
-        })).run();
-
-        return getInstance();
+    /**
+     * Load Image from String url into ImageView imageView
+     * @param url
+     * @param imageView
+     */
+    public void loadImageIntoImageView(final String url, final ImageView imageView){
+        this.loadTaskManager.loadImageIntoImageView(url, imageView, cacheManager, clientManager);
     }
 
-    public Sketch loadImageIntoImageViewWithSize(String url, ImageView imageView, int width, int height){
-        loadTaskManager.loadImageIntoImageView(url, imageView);
-
-        return getInstance();
-    }
+    /**
+     * Load Image from String url into ImageView imageView with width & height size
+     * @param url
+     * @param imageView
+     * @param width
+     * @param height
+     */
+    /*public void loadImageIntoImageViewWithSize(String url, ImageView imageView, int width, int height){
+        this.loadTaskManager.loadImageIntoImageView(url, imageView, cacheManager, clientManager);
+    }*/
 }

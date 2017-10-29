@@ -1,3 +1,7 @@
+/**
+ * Created by Salah
+ */
+
 package com.saos.salah.sketch.cache;
 
 import android.app.ActivityManager;
@@ -7,10 +11,10 @@ import android.support.v4.util.LruCache;
 import android.util.Log;
 
 /**
- * Created by Salah on 27/10/2017.
+ * Manage all operation on memory cache
  */
 
-public class MemoryCache {
+public class MemoryCache implements Cache{
 
     public static int CACHE_INITIALIZED = 10;
     public static int NOT_ENOUGHT_MEMORY = 11;
@@ -58,20 +62,20 @@ public class MemoryCache {
         }
     }
 
-    public void putBitmapOnCache(String url, Bitmap image) {
+    public void put(String url, Bitmap image) {
         Log.i("CacheManager", "putBitmapOnCache");
         synchronized (this) {
             bitmapCache.put(url, image);
         }
     }
 
-    public boolean isLinkedUrlExist(String url) {
+    public boolean contain(String url) {
         synchronized (this) {
             return !(bitmapCache.get(url) == null);
         }
     }
 
-    public Bitmap getBitmapFromCache(String url){
+    public Bitmap get(String url){
         Log.i("CacheManager", "getBitmapFromCache");
         synchronized (this) {
             return bitmapCache.get(url);

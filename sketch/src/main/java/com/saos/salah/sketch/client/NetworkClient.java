@@ -1,3 +1,6 @@
+/**
+ * Created by Salah
+ */
 package com.saos.salah.sketch.client;
 
 import android.graphics.Bitmap;
@@ -13,9 +16,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Created by Salah on 27/10/2017.
+ * Manage load with client
  */
-
 public class NetworkClient {
 
     private final OkHttpClient client;
@@ -25,6 +27,11 @@ public class NetworkClient {
     }
 
 
+    /**
+     * load a simple bitmap from url
+     * @param url
+     * @return
+     */
     public Bitmap loadBitmap(final String url) {
         Log.i("NetworkClient", "loadBitmap");
 
@@ -35,9 +42,7 @@ public class NetworkClient {
         final Response response;
         try {
             response = client.newCall(request).execute();
-            //BitmapFactory.Options options = new BitmapFactory.Options();
-            //options.inJustDecodeBounds = true;
-            return BitmapFactory.decodeStream(response.body().byteStream()/*, null, options*/);
+            return BitmapFactory.decodeStream(response.body().byteStream());
         } catch (IOException e) {
             Log.i("NetworkClient", "loadBitmap :" + e.getMessage());
         }
@@ -45,6 +50,13 @@ public class NetworkClient {
         return null;
     }
 
+    /**
+     * Load a bitmap with a simple size give by width and height
+     * @param url
+     * @param width
+     * @param height
+     * @return
+     */
     public Bitmap loadBitmapForMeasure(final String url, final int width, final int height) {
         Log.i("NetworkClient", "loadBitmapForMeasure");
         final Request request = new Request.Builder()
@@ -57,7 +69,9 @@ public class NetworkClient {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = Utils.calculateInSampleSize(options, width, height);
             options.inJustDecodeBounds = false;
-            return BitmapFactory.decodeStream(response.body().byteStream(), null, options);
+            Bitmap result = BitmapFactory.decodeStream(response.body().byteStream(), null, options);
+            response.close();
+            return result;
         } catch (IOException e) {
             Log.e("NetworkClient", "loadBitmapForMeasure ERROR :" + e.getMessage());
         }

@@ -24,16 +24,16 @@ import java.security.NoSuchAlgorithmException;
 
 
 /**
- * Disk cache
+ * Manage operation in DiskCache
  */
 
-public class DiskCache {
+public class DiskCache implements Cache{
     private static String TAG = DiskCache.class.getName();
     private DiskLruCache mDiskLruCache;
 
     private Bitmap.CompressFormat mCompressFormat = Bitmap.CompressFormat.PNG;
     private int mCompressQuality = 70;
-    private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
+    private static final int DISK_CACHE_SIZE = 1024 * 1024 * 100; // 10MB
     private static final String DISK_CACHE_SUBDIR = "thumbnails";
 
     public DiskCache(Context context){
@@ -41,11 +41,21 @@ public class DiskCache {
             File cacheDir = getDiskCacheDir(context, DISK_CACHE_SUBDIR);
             mDiskLruCache = DiskLruCache.open(cacheDir, 1, 1, DISK_CACHE_SIZE);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error initialize msg : " + e.getMessage());
         }
     }
 
-    public static File getDiskCacheDir(Context context, String uniqueName) {
+    public DiskCache(Context context, int diskSize){
+        try {
+            File cacheDir = getDiskCacheDir(context, DISK_CACHE_SUBDIR);
+            mDiskLruCache = DiskLruCache.open(cacheDir, 1, 1, diskSize);
+        } catch (IOException e) {
+            Log.e(TAG, "Error initialize msg : " + e.getMessage());
+        }
+    }
+
+
+    private static File getDiskCacheDir(Context context, String uniqueName) {
         final String cachePath = context.getCacheDir().getPath();
 
         return new File(cachePath + File.separator + uniqueName);
@@ -57,29 +67,31 @@ public class DiskCache {
      * @param url
      * @param bitmap
      */
-    public void putBitmap(String url, Bitmap bitmap) {
+    public void put(String url, Bitmap bitmap) {
+        String hashUrl = createUrlHashCode(url);
         synchronized (this) {
-            url = crateBase64String(url);
-            DiskLruCache.Editor editor = null;
-            try {
-                editor = mDiskLruCache.edit(url);
-                if (editor == null)
-                    return;
-
-                if (writeBitmapToFile(bitmap, editor)) {
-                    mDiskLruCache.flush();
-                    editor.commit();
-                    Log.i(TAG, "Put bitmap into Disk cache");
-                } else {
-                    editor.abort();
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "Error msg : " + e.getMessage());
+            if (!contain(hashUrl)) {
+                DiskLruCache.Editor editor = null;
                 try {
-                    if (editor != null) {
+                    editor = mDiskLruCache.edit(hashUrl);
+                    if (editor == null)
+                        return;
+
+                    if (writeBitmapToFile(bitmap, editor)) {
+                        mDiskLruCache.flush();
+                        editor.commit();
+                        Log.i(TAG, "Put bitmap into Disk cache");
+                    } else {
                         editor.abort();
                     }
-                } catch (IOException ignored) {
+                } catch (IOException e) {
+                    Log.e(TAG, "Error msg : " + e.getMessage());
+                    try {
+                        if (editor != null) {
+                            editor.abort();
+                        }
+                    } catch (IOException ignored) {
+                    }
                 }
             }
         }
@@ -91,9 +103,8 @@ public class DiskCache {
      * @param url
      * @return
      */
-    public Bitmap getBitmap(String url) {
-        synchronized (this) {
-            url = crateBase64String(url);
+    public Bitmap get(String url) {
+        url = createUrlHashCode(url);
             Bitmap bitmap = null;
             DiskLruCache.Snapshot snapshot = null;
             try {
@@ -117,7 +128,6 @@ public class DiskCache {
 
 
             return bitmap;
-        }
     }
 
     private boolean writeBitmapToFile(Bitmap bitmap, DiskLruCache.Editor editor) {
@@ -147,9 +157,8 @@ public class DiskCache {
      * @param url
      * @return
      */
-    public boolean containsKey(String url) {
-        synchronized (this) {
-            url = crateBase64String(url);
+    public boolean contain(String url) {
+            url = createUrlHashCode(url);
             boolean contained = false;
             DiskLruCache.Snapshot snapshot = null;
             try {
@@ -164,39 +173,15 @@ public class DiskCache {
             }
 
             return contained;
-        }
     }
 
-    private static final char[] DIGITS
-            = {'0', '1', '2', '3', '4', '5', '6', '7',
-            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-
-    private String crateBase64String(String url) {
+    private String createUrlHashCode(String url) {
         String cacheKey;
-        try {
-            final MessageDigest mDigest = MessageDigest.getInstance("MD5");
-            mDigest.update(url.getBytes());
-            cacheKey = bytesToHexString(mDigest.digest());
-        } catch (NoSuchAlgorithmException e) {
-            cacheKey = String.valueOf(url.hashCode());
-        }
+        cacheKey = String.valueOf(url.hashCode());
         return cacheKey;
-    }
-
-    private String bytesToHexString(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            String hex = Integer.toHexString(0xFF & bytes[i]);
-            if (hex.length() == 1) {
-                sb.append('0');
-            }
-            sb.append(hex);
-        }
-        return sb.toString();
     }
 
     public File getCacheFolder() {
         return mDiskLruCache.getDirectory();
     }
-
 }

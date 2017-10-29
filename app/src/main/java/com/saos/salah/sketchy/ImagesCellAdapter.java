@@ -1,7 +1,6 @@
 package com.saos.salah.sketchy;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.saos.salah.sketch.Sketch;
-import com.saos.salah.sketch.listener.BitmapLoaderListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -81,6 +80,9 @@ public class ImagesCellAdapter extends RecyclerView.Adapter<ImagesCellAdapter.Vi
             "https://upload.wikimedia.org/wikipedia/en/0/00/Final_Fantasy_V_Box_JAP.jpg"
     );
 
+
+    List<String> strings = new ArrayList<>();
+
     Context context;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -104,26 +106,21 @@ public class ImagesCellAdapter extends RecyclerView.Adapter<ImagesCellAdapter.Vi
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         //Test other lib
 
-
-/*        Sketch.getInstance().initCacheWithDefaultSize(context).loadImage(urls.get(position), new BitmapLoaderListener() {
+        /*Sketch.getInstance().initCacheWithDefaultSize(context).loadImage(urls.get(position), new BitmapLoaderListener() {
             @Override
-            public void onFinish(Bitmap bitmap) {
+            public void onFinish(final Bitmap bitmap) {
                 holder.image.setImageBitmap(bitmap);
-            }
-
+                holder.image.postInvalidate();
             @Override
             public void onCancel() {
                 holder.image.setImageBitmap(null);
             }
         });*/
-        Sketch.getInstance().initCacheWithDefaultSize(context).loadImageIntoImageView(urls.get(position), holder.image);
-        //(new DownloadImageTask(holder.image)).execute(urls.get(position));
-        //Picasso.with(context).load(urls.get(position)).into(holder.image);
-        //MainActivity.imageLoader.displayImage(urls.get(position),holder.image , MainActivity.displayImageOptions);
-//        holder.image.setImageResource(R.drawable.foot);
+
+        Sketch.getInstance(context).disableDiskCache().loadImageIntoImageView(urls.get(position), holder.image);
     }
 
     @Override

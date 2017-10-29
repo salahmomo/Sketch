@@ -32,42 +32,5 @@ public class MainActivity extends AppCompatActivity {
         listView.setLayoutManager(mLayoutManager);
         imagesCellAdapter = new ImagesCellAdapter(getBaseContext());
         listView.setAdapter(imagesCellAdapter);
-
-        displayImageOptions = new DisplayImageOptions.Builder()
-                .cacheOnDisk(true)
-                .resetViewBeforeLoading(true)
-                .displayer(new FadeInBitmapDisplayer(300))
-                .build();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                imageLoader = ImageLoader.getInstance();
-                ImageLoaderConfiguration configuration = new ImageLoaderConfiguration.Builder(MainActivity.this)
-                        .memoryCacheSize(2 * 1024 * 1024)
-                        .memoryCacheSizePercentage(13) // default
-                        .build();
-                imageLoader.init(configuration);
-            }
-        }).start();
-
-        /*for (int i= 0 ; i < 100000; i++) {
-            Sketch.getInstance().initCacheWithDefaultSize(this).loadImage("https://vignette4.wikia.nocookie.net/finalfantasy/images/6/60/FF4TheAfterIllustration2.jpg/revision/latest?cb=20120707013849", new BitmapLoaderListener() {
-                @Override
-                public void onFinish(Bitmap bitmap) {
-
-                }
-
-                @Override
-                public void onCancel() {
-
-                }
-            });
-            //Picasso.with(this).load("https://vignette4.wikia.nocookie.net/finalfantasy/images/6/60/FF4TheAfterIllustration2.jpg/revision/latest?cb=20120707013849");
-        }*/
-        /*(new DownloadImageTask(imageView)).execute("https://vignette.wikia.nocookie.net/finalfantasy/images/2/24/PFF_Sketch.png/revision/latest/top-crop/width/480/height/480?cb=20170812203632");
-        (new DownloadImageTask(imageView)).execute("https://vignette.wikia.nocookie.net/finalfantasy/images/2/24/PFF_Sketch.png/revision/latest/top-crop/width/480/height/480?cb=20170812203632");
-        (new DownloadImageTask(imageView)).execute("https://vignette.wikia.nocookie.net/finalfantasy/images/2/24/PFF_Sketch.png/revision/latest/top-crop/width/480/height/480?cb=20170812203632");
-        (new DownloadImageTask(imageView)).execute("https://vignette.wikia.nocookie.net/finalfantasy/images/2/24/PFF_Sketch.png/revision/latest/top-crop/width/480/height/480?cb=20170812203632");
-        (new DownloadImageTask(imageView)).execute("https://vignette.wikia.nocookie.net/finalfantasy/images/2/24/PFF_Sketch.png/revision/latest/top-crop/width/480/height/480?cb=20170812203632");*/
     }
 }
