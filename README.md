@@ -1,5 +1,5 @@
 # Sketch
-An lazy image loading library for Android
+ Library for loading, display and caching image on Android
 
 ## Features
 * Async multithread image loading on imageView or only in cache
