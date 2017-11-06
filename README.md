@@ -22,13 +22,13 @@ Sketch.getInstance(context, memorySize, dislSize).loadImageIntoImageView(url, im
 
 #### Enable/disable disk caching
 
-* Disable dick caching
+* Disable disk caching
 
 ``` java
-Sketch.getInstance(context).diasble().loadImageIntoImageView(url, image);
+Sketch.getInstance(context).disable().loadImageIntoImageView(url, image);
 ```
 
-* Enable dick caching
+* Enable disk caching
 
 ``` java
 Sketch.getInstance(context).enable().loadImageIntoImageView(url, image);
